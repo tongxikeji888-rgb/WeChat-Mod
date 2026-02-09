@@ -6,7 +6,7 @@ jobs:
   build:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4   # 这里升级到了 v4
+      - uses: actions/checkout@v4
 
       - name: Install Theos
         run: |
@@ -15,15 +15,22 @@ jobs:
 
       - name: Get iOS SDK
         run: |
+          # 1. 暴力删除可能存在的冲突文件夹 (这就是修复 128 错误的关键！)
+          rm -rf $HOME/theos/sdks
+          
+          # 2. 重新下载 SDK
           git clone --depth 1 https://github.com/xybp888/iOS-SDKs $HOME/theos/sdks/
+          
+          # 3. 把 iOS 16.5 改名为默认 SDK
           mv $HOME/theos/sdks/iPhoneOS16.5.sdk $HOME/theos/sdks/iPhoneOS.sdk
 
       - name: Build Package
         run: |
+          # 编译！
           make package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4   # 重点在这里！必须是 v4！
+        uses: actions/upload-artifact@v4
         with:
           name: WeChatMod-Rootless
           path: packages/*.deb
