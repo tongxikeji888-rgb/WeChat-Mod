@@ -1,6 +1,9 @@
 name: Build DEB
 
-on: [push]
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -10,20 +13,22 @@ jobs:
 
       - name: Install Theos
         run: |
-          git clone --recursive https://github.com/theos/theos.git $HOME/theos
+          bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
           echo "THEOS=$HOME/theos" >> $GITHUB_ENV
 
       - name: Get iOS SDK
         run: |
-          git clone https://github.com/xybp888/iOS-SDKs $HOME/theos/sdks/iOS14.5.sdk
-          mv $HOME/theos/sdks/iOS14.5.sdk $HOME/theos/sdks/iPhoneOS14.5.sdk
+          # 下载 iOS 16.5 SDK (兼容性更好)
+          git clone --depth 1 https://github.com/xybp888/iOS-SDKs $HOME/theos/sdks/
+          mv $HOME/theos/sdks/iPhoneOS16.5.sdk $HOME/theos/sdks/iPhoneOS.sdk
 
       - name: Build Package
         run: |
-          make package FINALPACKAGE=1
+          # 强制指定架构和无根模式
+          make package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
 
       - name: Upload DEB
         uses: actions/upload-artifact@v3
         with:
-          name: WeChatMod-DEB
+          name: WeChatMod-Rootless
           path: packages/*.deb
