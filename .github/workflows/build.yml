@@ -8,25 +8,34 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Theos
+      - name: Install Theos (Manual Mode)
         run: |
-          bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
+          # 重点在这里！我们不再用那个报错的 install-theos 脚本
+          # 而是直接手动克隆，这样就不需要访问 API 了！
+          git clone --recursive https://github.com/theos/theos.git $HOME/theos
           echo "THEOS=$HOME/theos" >> $GITHUB_ENV
 
-      - name: Get iOS SDK
+      - name: Get iOS SDK (ZIP Mode)
         run: |
-          # 暴力删除旧文件，防止冲突
+          # 1. 清理环境
           rm -rf $HOME/theos/sdks
-          # 下载 SDK
-          git clone --depth 1 https://github.com/xybp888/iOS-SDKs $HOME/theos/sdks/
-          # 改名
-          mv $HOME/theos/sdks/iPhoneOS16.5.sdk $HOME/theos/sdks/iPhoneOS.sdk
+          mkdir -p $HOME/theos/sdks
+          
+          # 2. 直接下载 ZIP 包 (比 git clone 稳定 100 倍，不会断连)
+          # 我们用 iOS 14.5 SDK，兼容性最好，文件也小
+          curl -L -o sdk.zip https://github.com/xybp888/iOS-SDKs/raw/master/iPhoneOS14.5.sdk.zip
+          
+          # 3. 解压
+          unzip -q sdk.zip -d $HOME/theos/sdks/
+          
+          # 4. 确认一下文件在不在
+          ls -l $HOME/theos/sdks/
 
       - name: Build Package
         run: |
-          # 编译指令
-          make package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
-
+          # 强制指定 SDK 版本
+          make package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless TARGET=iphone:clang:latest:14.5
+          
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
