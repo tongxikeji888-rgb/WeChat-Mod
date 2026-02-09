@@ -1,0 +1,9 @@
+Package: com.yourname.wechatmod
+Name: WeChat Mod
+Version: 1.0.0
+Architecture: iphoneos-arm
+Description: A simple WeChat tweak
+Maintainer: You
+Author: You
+Section: Tweaks
+Depends: mobilesubstrate
