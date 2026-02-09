@@ -1,9 +1,6 @@
 name: Build DEB
 
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+on: [push]
 
 jobs:
   build:
@@ -18,16 +15,14 @@ jobs:
 
       - name: Get iOS SDK
         run: |
-          # 下载 iOS 16.5 SDK (兼容性更好)
           git clone --depth 1 https://github.com/xybp888/iOS-SDKs $HOME/theos/sdks/
           mv $HOME/theos/sdks/iPhoneOS16.5.sdk $HOME/theos/sdks/iPhoneOS.sdk
 
       - name: Build Package
         run: |
-          # 强制指定架构和无根模式
           make package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
 
-      - name: Upload DEB
+      - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
           name: WeChatMod-Rootless
