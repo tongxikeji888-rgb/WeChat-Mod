@@ -15,18 +15,16 @@ jobs:
 
       - name: Get iOS SDK
         run: |
-          # 1. 暴力删除可能存在的冲突文件夹 (这就是修复 128 错误的关键！)
+          # 暴力删除旧文件，防止冲突
           rm -rf $HOME/theos/sdks
-          
-          # 2. 重新下载 SDK
+          # 下载 SDK
           git clone --depth 1 https://github.com/xybp888/iOS-SDKs $HOME/theos/sdks/
-          
-          # 3. 把 iOS 16.5 改名为默认 SDK
+          # 改名
           mv $HOME/theos/sdks/iPhoneOS16.5.sdk $HOME/theos/sdks/iPhoneOS.sdk
 
       - name: Build Package
         run: |
-          # 编译！
+          # 编译指令
           make package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
 
       - name: Upload Artifact
