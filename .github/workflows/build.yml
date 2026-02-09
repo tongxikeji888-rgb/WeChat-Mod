@@ -8,27 +8,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Dependencies (Fix ldid error)
+        run: |
+          # 这就是刚才缺少的“车钥匙”！
+          # 安装 ldid 签名工具
+          brew install ldid
+          
       - name: Install Theos
         run: |
-          # 1. 手动克隆 Theos (不走脚本，防止 API 报错)
+          # 手动克隆 Theos
           git clone --recursive https://github.com/theos/theos.git $HOME/theos
           echo "THEOS=$HOME/theos" >> $GITHUB_ENV
 
-      - name: Get iOS SDK (Git Method Fixed)
+      - name: Get iOS SDK
         run: |
-          # 2. 暴力清理！不管有没有，先删了再说！
+          # 暴力清理
           rm -rf $HOME/theos/sdks
           mkdir -p $HOME/theos/sdks
           
-          # 3. 克隆 SDK (使用 --depth 1 保证速度)
-          # 这是一个非常稳定的 SDK 源
+          # 克隆 SDK
           git clone --depth 1 https://github.com/xybp888/iOS-SDKs.git $HOME/theos/sdks/temp
           
-          # 4. 移动我们需要的文件 (防止路径错误)
-          # 把里面的 iPhoneOS14.5.sdk 拿出来，改名为 iPhoneOS.sdk
+          # 移动文件
           mv $HOME/theos/sdks/temp/iPhoneOS14.5.sdk $HOME/theos/sdks/iPhoneOS.sdk
-          
-          # 5. 清理临时文件
           rm -rf $HOME/theos/sdks/temp
 
       - name: Build Package
